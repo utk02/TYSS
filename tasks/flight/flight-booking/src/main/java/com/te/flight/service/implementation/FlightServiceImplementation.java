@@ -2,6 +2,7 @@ package com.te.flight.service.implementation;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
@@ -13,11 +14,13 @@ import com.te.flight.entity.dto.BookFlightDto;
 import com.te.flight.entity.dto.FlightDetailsDto;
 import com.te.flight.entity.dto.FlightDto;
 import com.te.flight.entity.dto.SearchFlightDto;
+import com.te.flight.exceptions.InvalidUserIdException;
 import com.te.flight.exceptions.NoFlightFoundException;
 import com.te.flight.exceptions.SeatNotAvailableException;
 import com.te.flight.repository.FlightRepository;
 import com.te.flight.repository.UserRepository;
 import com.te.flight.service.FlightService;
+import com.te.flight.utils.EmailUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -66,19 +69,26 @@ public class FlightServiceImplementation implements FlightService {
 
 	@Override
 	public BookFlightDto bookFlight(BookFlightDto bookFlightDto) {
-		Flight flight = flightRepository.findById(bookFlightDto.getFlightId()).get();
+		Optional<Flight> flightOptional = flightRepository.findById(bookFlightDto.getFlightId());
+		Optional<User> userOptional = userRepository.findById(bookFlightDto.getUserId());
+		if (flightOptional.isPresent() && userOptional.isPresent()) {
+			Flight flight = flightOptional.get();
+			User user = userOptional.get();
 
-		if (flight.getAvailableSeats() > 0) {
-			flight.setBookedSeats(flight.getBookedSeats() + 1);
-			flight.setAvailableSeats(flight.getTotalSeats() - flight.getBookedSeats());
-			List<User> users = flight.getUsers();
-			users.add(userRepository.findById(bookFlightDto.getUserId()).get());
-			flight.setUsers(users);
-			flight = flightRepository.save(flight);
-			BeanUtils.copyProperties(flight, bookFlightDto);
-			return bookFlightDto;
+			if (flight.getAvailableSeats() > 0) {
+				flight.setBookedSeats(flight.getBookedSeats() + 1);
+				flight.setAvailableSeats(flight.getTotalSeats() - flight.getBookedSeats());
+				List<User> users = flight.getUsers();
+				users.add(user);
+				flight.setUsers(users);
+				flight = flightRepository.save(flight);
+				EmailUtils.sendEmail(user.getUserEmail(), "Flight booking confirmation", "Your booking is confirmed");
+				BeanUtils.copyProperties(flight, bookFlightDto);
+				return bookFlightDto;
+			}
+			throw new SeatNotAvailableException("Seat not available");
 		}
-		throw new SeatNotAvailableException("Seat not available");
+		throw new InvalidUserIdException("User with given user Id not found");
 	}
 
 }

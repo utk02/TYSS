@@ -17,13 +17,13 @@ public class EmailUtils {
 	private static final String password = "test12345#";
 	private static String host = "smtp.gmail.com";
 	private static String port = "465";
-	private static final String appPassword = "vpwhuqwfaabcunzg";
+	private static final String appPassword = "ziuugwebnsmpdlbt";
 
 	public static boolean sendEmail(String emailAddress, String subject, String message) {
 
 		Properties properties = System.getProperties();
-		properties.setProperty("host", host);
-		properties.setProperty("port", port);
+		properties.setProperty("mail.smtp.host", host);
+		properties.setProperty("mail.smtp.port", port);
 		properties.setProperty("mail.smtp.ssl.enable", "true");
 		properties.setProperty("mail.smtp.auth", "true");
 
@@ -33,6 +33,8 @@ public class EmailUtils {
 				return new PasswordAuthentication(usename, appPassword);
 			}
 		});
+
+		session.setDebug(true);
 
 		MimeMessage mimeMessage = new MimeMessage(session);
 		try {
