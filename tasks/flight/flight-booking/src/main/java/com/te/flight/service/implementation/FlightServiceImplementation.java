@@ -1,5 +1,6 @@
 package com.te.flight.service.implementation;
 
+import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -21,25 +22,36 @@ import com.te.flight.repository.FlightRepository;
 import com.te.flight.repository.UserRepository;
 import com.te.flight.service.FlightService;
 import com.te.flight.utils.EmailUtils;
+import com.te.flight.utils.InvoiceUtils;
+import com.te.flight.utils.SmsUtils;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FlightServiceImplementation implements FlightService {
 	private final FlightRepository flightRepository;
 	private final UserRepository userRepository;
+	private final EmailUtils emailUtils;
+	private final SmsUtils smsUtils;
 
 	@Override
 	public FlightDto saveFlight(FlightDto flightDto) {
+		log.trace("In the service layer to save flight : " + flightDto.getFlightId());
 		Flight flight = new Flight();
 		BeanUtils.copyProperties(flightDto, flight);
+		log.trace("converted from flightDto to flight");
 		Duration duration = Duration.between(flight.getDeparture(), flight.getArrival());
 		String journeyTime = duration.toHours() + ":" + duration.toMinutes() % 60 + "hrs";
 		flight.setJourneyTime(journeyTime);
 		flight.setAvailableSeats(flight.getTotalSeats());
 		flight.setBookedSeats(0);
+		log.debug("Saving flight");
 		flight = flightRepository.save(flight);
+		log.warn("flight saved flightId : " + flight.getFlightId() + " from : " + flight.getOrigin() + " to : "
+				+ flight.getDestination());
 		BeanUtils.copyProperties(flightDto, flight);
 		return flightDto;
 	}
@@ -82,7 +94,13 @@ public class FlightServiceImplementation implements FlightService {
 				users.add(user);
 				flight.setUsers(users);
 				flight = flightRepository.save(flight);
-				EmailUtils.sendEmail(user.getUserEmail(), "Flight booking confirmation", "Your booking is confirmed");
+				try {
+					InvoiceUtils.genrateInvoice(user, flight);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+				emailUtils.sendEmail(user.getUserEmail(), "Flight booking confirmation", user, flight);
+//				smsUtils.sendSms(user,flight);
 				BeanUtils.copyProperties(flight, bookFlightDto);
 				return bookFlightDto;
 			}

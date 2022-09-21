@@ -9,7 +9,9 @@ import com.te.flight.repository.UserRepository;
 import com.te.flight.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
@@ -17,6 +19,7 @@ public class UserServiceImplementation implements UserService {
 
 	@Override
 	public UserDto saveUser(UserDto userDto) {
+		log.debug("In the service layer, saveUser() method");
 		User user = new User();
 		BeanUtils.copyProperties(userDto, user);
 		user = userRepository.save(user);
