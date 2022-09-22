@@ -15,9 +15,11 @@ import com.te.flight.entity.dto.BookFlightDto;
 import com.te.flight.entity.dto.FlightDetailsDto;
 import com.te.flight.entity.dto.FlightDto;
 import com.te.flight.entity.dto.SearchFlightDto;
+import com.te.flight.exceptions.FlightIdAlreadyExistException;
 import com.te.flight.exceptions.InvalidUserIdException;
 import com.te.flight.exceptions.NoFlightFoundException;
 import com.te.flight.exceptions.SeatNotAvailableException;
+import com.te.flight.exceptions.SomethingWentWrongException;
 import com.te.flight.repository.FlightRepository;
 import com.te.flight.repository.UserRepository;
 import com.te.flight.service.FlightService;
@@ -39,21 +41,29 @@ public class FlightServiceImplementation implements FlightService {
 
 	@Override
 	public FlightDto saveFlight(FlightDto flightDto) {
-		log.trace("In the service layer to save flight : " + flightDto.getFlightId());
-		Flight flight = new Flight();
-		BeanUtils.copyProperties(flightDto, flight);
-		log.trace("converted from flightDto to flight");
-		Duration duration = Duration.between(flight.getDeparture(), flight.getArrival());
-		String journeyTime = duration.toHours() + ":" + duration.toMinutes() % 60 + "hrs";
-		flight.setJourneyTime(journeyTime);
-		flight.setAvailableSeats(flight.getTotalSeats());
-		flight.setBookedSeats(0);
-		log.debug("Saving flight");
-		flight = flightRepository.save(flight);
-		log.warn("flight saved flightId : " + flight.getFlightId() + " from : " + flight.getOrigin() + " to : "
-				+ flight.getDestination());
-		BeanUtils.copyProperties(flightDto, flight);
-		return flightDto;
+		Optional<Flight> findById = flightRepository.findById(flightDto.getFlightId());
+		if (findById.isEmpty()) {
+			log.trace("In the service layer to save flight : " + flightDto.getFlightId());
+			Flight flight = new Flight();
+			BeanUtils.copyProperties(flightDto, flight);
+			log.trace("converted from flightDto to flight");
+			Duration duration = Duration.between(flight.getDeparture(), flight.getArrival());
+			String journeyTime = duration.toHours() + ":" + duration.toMinutes() % 60 + "hrs";
+			flight.setJourneyTime(journeyTime);
+			flight.setAvailableSeats(flight.getTotalSeats());
+			flight.setBookedSeats(0);
+			log.debug("Saving flight");
+			flight = flightRepository.save(flight);
+			log.warn("flight saved flightId : " + flight.getFlightId() + " from : " + flight.getOrigin() + " to : "
+					+ flight.getDestination());
+			BeanUtils.copyProperties(flight, flightDto);
+			if (flightDto == null) {
+				throw new SomethingWentWrongException("Someting went wrong while saving flight please try again");
+			}
+			return flightDto;
+		}
+		throw new FlightIdAlreadyExistException(
+				"flight with flightId" + flightDto.getFlightId() + "already exists use different flightId");
 	}
 
 	@Override

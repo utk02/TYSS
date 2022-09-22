@@ -14,8 +14,6 @@ import lombok.Setter;
 public class BookFlightDto {
 	private String flightId;
 	private String userId;
-	private String origin;
-	private String destination;
 	private LocalDateTime departure;
 
 }

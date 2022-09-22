@@ -28,8 +28,7 @@ public class UserController {
 	public ResponseEntity<GeneralResponse> saveUser(@RequestBody UserDto userDto) {
 		log.trace("In the UserController saveUser api.");
 		userDto = userService.saveUser(userDto);
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/user").toUriString());
-		return ResponseEntity.created(uri)
-				.body(new GeneralResponse(HttpStatus.CREATED, false, "User saved succesfully", userDto));
+		return new ResponseEntity<>(GeneralResponse.builder().status(HttpStatus.CREATED).error(false)
+				.message("user saved successfully").data(userDto).build(), HttpStatus.CREATED);
 	}
 }

@@ -34,7 +34,7 @@ public class FlightController {
 		log.trace("In the flight controller -> saveFlight api");
 		flightDto = flightService.saveFlight(flightDto);
 		log.debug("New Flight scheduled with flight id : " + flightDto.getFlightId());
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/flight").toUriString());
+//		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/flight").toUriString());
 //		return ResponseEntity.created(uri)
 //				.body(new GeneralResponse(HttpStatus.OK, false, "Flight scheduled succesfully", flightDto));
 		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDto).error(false)
@@ -58,9 +58,11 @@ public class FlightController {
 		bookFlightDto = flightService.bookFlight(bookFlightDto);
 		log.warn("Flight booked with userId : " + bookFlightDto.getUserId() + " flightId : "
 				+ bookFlightDto.getFlightId());
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/flight").toUriString());
-		return ResponseEntity.created(uri)
-				.body(new GeneralResponse(HttpStatus.CREATED, false, "Flight booked", bookFlightDto));
+//		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/flight").toUriString());
+//		return ResponseEntity.created(uri)
+//				.body(new GeneralResponse(HttpStatus.CREATED, false, "Flight booked", bookFlightDto));
+		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().status(HttpStatus.CREATED).error(false)
+				.message("flight booked successfully").data(bookFlightDto).build(), HttpStatus.CREATED);
 	}
 
 }
