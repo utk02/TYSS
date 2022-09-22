@@ -14,20 +14,20 @@ public class ExceptionHandler {
 
 	@org.springframework.web.bind.annotation.ExceptionHandler
 	public ResponseEntity<GeneralResponse> handler(NoFlightFoundException e) {
-		return ResponseEntity.badRequest()
-				.body(new GeneralResponse(HttpStatus.BAD_REQUEST, "No flight for given journey", e.getMessage(), null));
+		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().status(HttpStatus.NOT_FOUND).error(true)
+				.message("No flight found for given journey").build(), HttpStatus.NOT_FOUND);
 	}
 
 	@org.springframework.web.bind.annotation.ExceptionHandler
 	public ResponseEntity<GeneralResponse> handler(SeatNotAvailableException e) {
 		return ResponseEntity.badRequest()
-				.body(new GeneralResponse(HttpStatus.BAD_REQUEST, "no seat available", e.getMessage(), null));
+				.body(new GeneralResponse(HttpStatus.BAD_REQUEST, true, e.getMessage(), null));
 	}
 
 	@org.springframework.web.bind.annotation.ExceptionHandler
 	public ResponseEntity<GeneralResponse> handler(InvalidUserIdException e) {
 		return ResponseEntity.badRequest()
-				.body(new GeneralResponse(HttpStatus.BAD_REQUEST, "no user found", e.getMessage(), null));
+				.body(new GeneralResponse(HttpStatus.BAD_REQUEST, true, e.getMessage(), null));
 	}
 
 }

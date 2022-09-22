@@ -58,9 +58,9 @@ public class FlightServiceImplementation implements FlightService {
 
 	@Override
 	public List<FlightDetailsDto> getFlightDetails(SearchFlightDto searchFlightDto) {
-		if (!flightRepository.findByOrigin(searchFlightDto.getOrigin()).isEmpty()) {
-			List<FlightDetailsDto> flightDetailsDtos = flightRepository.findByOrigin(searchFlightDto.getOrigin())
-					.stream()
+		List<Flight> flights = flightRepository.findByOrigin(searchFlightDto.getOrigin());
+		if (!flights.isEmpty()) {
+			List<FlightDetailsDto> flightDetailsDtos = flights.stream()
 					.filter(f -> f.getDestination().equalsIgnoreCase(searchFlightDto.getDestination())
 							&& f.getDeparture().getYear() == searchFlightDto.getDepartureDate().getYear()
 							&& f.getDeparture().getMonth() == searchFlightDto.getDepartureDate().getMonth()

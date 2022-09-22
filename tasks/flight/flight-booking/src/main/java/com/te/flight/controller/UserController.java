@@ -30,6 +30,6 @@ public class UserController {
 		userDto = userService.saveUser(userDto);
 		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/user").toUriString());
 		return ResponseEntity.created(uri)
-				.body(new GeneralResponse(HttpStatus.CREATED, null, "User saved succesfully", userDto));
+				.body(new GeneralResponse(HttpStatus.CREATED, false, "User saved succesfully", userDto));
 	}
 }
