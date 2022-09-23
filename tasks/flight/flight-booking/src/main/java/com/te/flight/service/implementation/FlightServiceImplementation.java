@@ -57,9 +57,6 @@ public class FlightServiceImplementation implements FlightService {
 			log.warn("flight saved flightId : " + flight.getFlightId() + " from : " + flight.getOrigin() + " to : "
 					+ flight.getDestination());
 			BeanUtils.copyProperties(flight, flightDto);
-			if (flightDto == null) {
-				throw new SomethingWentWrongException("Someting went wrong while saving flight please try again");
-			}
 			return flightDto;
 		}
 		throw new FlightIdAlreadyExistException(

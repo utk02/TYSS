@@ -23,12 +23,17 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserController {
 	private final UserService userService;
-	
+
 	@PostMapping("/save")
 	public ResponseEntity<GeneralResponse> saveUser(@RequestBody UserDto userDto) {
 		log.trace("In the UserController saveUser api.");
 		userDto = userService.saveUser(userDto);
-		return new ResponseEntity<>(GeneralResponse.builder().status(HttpStatus.CREATED).error(false)
-				.message("user saved successfully").data(userDto).build(), HttpStatus.CREATED);
+		if (userDto != null) {
+			return new ResponseEntity<>(GeneralResponse.builder().status(HttpStatus.CREATED).error(false)
+					.message("user saved successfully").data(userDto).build(), HttpStatus.CREATED);
+		}
+		return new ResponseEntity<>(GeneralResponse.builder().status(HttpStatus.BAD_REQUEST).error(false)
+				.message("user not saved").data(userDto).build(), HttpStatus.BAD_REQUEST);
+
 	}
 }

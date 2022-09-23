@@ -37,9 +37,13 @@ public class FlightController {
 //		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/flight").toUriString());
 //		return ResponseEntity.created(uri)
 //				.body(new GeneralResponse(HttpStatus.OK, false, "Flight scheduled succesfully", flightDto));
-		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDto).error(false)
-				.message("Flight saved succesfully").status(HttpStatus.CREATED).build(), HttpStatus.CREATED);
-	}
+		if (flightDto!=null) {
+			return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDto).error(false)
+					.message("Flight saved succesfully").status(HttpStatus.CREATED).build(), HttpStatus.CREATED);
+		}
+		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDto).error(true)
+				.message("flight not saved").status(HttpStatus.BAD_REQUEST).build(), HttpStatus.BAD_REQUEST);
+		}
 
 	@PostMapping("/flights")
 	public ResponseEntity<GeneralResponse> getAvailableFlights(@RequestBody SearchFlightDto flightDto) {
