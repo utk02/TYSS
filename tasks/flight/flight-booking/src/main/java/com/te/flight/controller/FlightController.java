@@ -34,25 +34,26 @@ public class FlightController {
 		log.trace("In the flight controller -> saveFlight api");
 		flightDto = flightService.saveFlight(flightDto);
 		log.debug("New Flight scheduled with flight id : " + flightDto.getFlightId());
-//		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/flight").toUriString());
-//		return ResponseEntity.created(uri)
-//				.body(new GeneralResponse(HttpStatus.OK, false, "Flight scheduled succesfully", flightDto));
-		if (flightDto!=null) {
+		if (flightDto != null) {
 			return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDto).error(false)
 					.message("Flight saved succesfully").status(HttpStatus.CREATED).build(), HttpStatus.CREATED);
 		}
 		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDto).error(true)
 				.message("flight not saved").status(HttpStatus.BAD_REQUEST).build(), HttpStatus.BAD_REQUEST);
-		}
+	}
 
 	@PostMapping("/flights")
 	public ResponseEntity<GeneralResponse> getAvailableFlights(@RequestBody SearchFlightDto flightDto) {
 		log.trace("In the flight controller -> getAvailableFlights api , searching flight : " + flightDto);
 		List<FlightDetailsDto> flightDetailsDtos = flightService.getFlightDetails(flightDto);
-//		return ResponseEntity.ok()
-//				.body(new GeneralResponse(HttpStatus.CREATED, false, "List of available flights", flightDetailsDtos));
-		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDetailsDtos).error(false)
-				.message("list of available flight").status(HttpStatus.OK).build(), HttpStatus.OK);
+		if (!flightDetailsDtos.isEmpty()) {
+			return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(flightDetailsDtos).error(false)
+					.message("list of available flight").status(HttpStatus.OK).build(), HttpStatus.OK);
+
+		}
+		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().data(null).error(true)
+				.message("No flight available for searched journey").status(HttpStatus.NOT_FOUND).build(),
+				HttpStatus.NOT_FOUND);
 	}
 
 	@PostMapping("/book")
@@ -62,11 +63,13 @@ public class FlightController {
 		bookFlightDto = flightService.bookFlight(bookFlightDto);
 		log.warn("Flight booked with userId : " + bookFlightDto.getUserId() + " flightId : "
 				+ bookFlightDto.getFlightId());
-//		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/flight").toUriString());
-//		return ResponseEntity.created(uri)
-//				.body(new GeneralResponse(HttpStatus.CREATED, false, "Flight booked", bookFlightDto));
-		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().status(HttpStatus.CREATED).error(false)
-				.message("flight booked successfully").data(bookFlightDto).build(), HttpStatus.CREATED);
+		if (bookFlightDto != null) {
+			return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().status(HttpStatus.CREATED).error(false)
+					.message("flight booked successfully").data(bookFlightDto).build(), HttpStatus.CREATED);
+		}
+		return new ResponseEntity<GeneralResponse>(GeneralResponse.builder().status(HttpStatus.BAD_REQUEST).error(true)
+				.message("flight not booked").data(bookFlightDto).build(), HttpStatus.BAD_REQUEST);
+
 	}
 
 }
